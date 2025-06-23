@@ -8,6 +8,7 @@ let currentData = [];
 let allData = []; // Lưu trữ tất cả dữ liệu (bao gồm cả dòng có giá trị 0)
 let fileName = '';
 let currentWorkbook = null;
+let currentSheetName = '';
 
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', function() {
@@ -186,6 +187,7 @@ function loadSelectedSheet() {
 
 // Xử lý dữ liệu từ sheet cụ thể
 function processSheet(sheetName) {
+    currentSheetName = sheetName; // Lưu tên sheet hiện tại
     const worksheet = currentWorkbook.Sheets[sheetName];
     
     // Chuyển đổi sheet thành JSON
@@ -333,8 +335,12 @@ function generateInvoice() {
 
 // Tạo HTML cho hóa đơn
 function createInvoiceHTML() {
-    const currentDate = new Date().toLocaleDateString('vi-VN');
-    const invoiceNumber = 'HD' + Date.now().toString().slice(-6);
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2);
+    const formattedDate = `${day}${month}${year}`;
+    const invoiceNumber = `${currentSheetName || 'HoaDon'}-${formattedDate}`;
     
     const { totalAmount, totalPaid, totalDebt } = calculateTotalsFromExcel();
     
@@ -344,10 +350,14 @@ function createInvoiceHTML() {
             <tr>
                 <td>${index + 1}</td>
                 <td>${formatDate(row['Ngày tháng'])}</td>
+                <td>${row['Loại giao dịch'] || ''}</td>
                 <td>${row['Loại hàng'] || ''}</td>
-                <td>${formatCurrency(row['Đơn giá'])}</td>
-                <td>${row['Số lượng'] || ''}</td>
+                <td class="text-right">${formatCurrency(row['Đơn giá'])}</td>
+                <td class="text-center">${row['Số lượng'] || ''}</td>
                 <td class="text-right">${formatCurrency(row['Thành tiền'])}</td>
+                <td class="text-right">${formatCurrency(row['Thanh toán'])}</td>
+                <td class="text-right">${formatCurrency(row['Còn nợ'])}</td>
+                <td>${row['Ghi chú'] || ''}</td>
             </tr>
         `;
     });
@@ -358,21 +368,21 @@ function createInvoiceHTML() {
                 <h1 class="invoice-title">HÓA ĐƠN THANH TOÁN</h1>
                 <p><strong>Số hóa đơn:</strong> ${invoiceNumber}</p>
             </div>
-            <div class="invoice-info">
-                <p><strong>Ngày tạo:</strong> ${currentDate}</p>
-                <p><strong>File gốc:</strong> ${fileName}</p>
-            </div>
         </div>
         
         <table class="invoice-table">
             <thead>
                 <tr>
                     <th>STT</th>
-                    <th>Ngày</th>
-                    <th>Mặt hàng</th>
-                    <th>Đơn giá</th>
-                    <th>Số lượng</th>
+                    <th>Ngày tháng</th>
+                    <th>Loại giao dịch</th>
+                    <th>Loại hàng</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-center">Số lượng</th>
                     <th class="text-right">Thành tiền</th>
+                    <th class="text-right">Thanh toán</th>
+                    <th class="text-right">Còn nợ</th>
+                    <th>Ghi chú</th>
                 </tr>
             </thead>
             <tbody>
@@ -395,9 +405,32 @@ function createInvoiceHTML() {
             </div>
         </div>
         
-        <div style="margin-top: 50px; text-align: center; color: #64748b;">
-            <p>Cảm ơn quý khách đã sử dụng dịch vụ!</p>
-            <p>Hóa đơn được tạo tự động từ hệ thống Excel to Invoice</p>
+        <div style="margin-top: 40px; text-align: center;">
+            <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #e2e8f0;">
+                <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ!</p>
+                <p style="margin: 0; font-size: 14px; color: #6b7280; font-style: italic;">Chúng tôi luôn nỗ lực để mang đến dịch vụ tốt nhất cho quý khách hàng.</p>
+            </div>
+            
+            <div style="padding: 25px; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 700; color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; display: inline-block;">
+                    CÔNG TY TNHH MỘT THÀNH VIÊN HỒNG XÔ
+                </h3>
+                
+                <div style="display: flex; justify-content: center; gap: 30px; margin-top: 15px; flex-wrap: wrap;">
+                    <div style="text-align: left;">
+                        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #374151;">📞 Liên hệ:</p>
+                        <p style="margin: 0 0 12px 0; font-size: 14px; color: #6b7280;">0987957669 (anh Hồng)</p>
+                        
+                        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #374151;">✉️ Email:</p>
+                        <p style="margin: 0; font-size: 14px; color: #6b7280;">hongnguyenxuan1111@gmail.com</p>
+                    </div>
+                    
+                    <div style="text-align: left;">
+                        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #374151;">📍 Địa chỉ:</p>
+                        <p style="margin: 0; font-size: 14px; color: #6b7280; max-width: 200px;">123 Đường XYZ, Phường ABC<br>Quận 1, TP. Hồ Chí Minh</p>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -406,9 +439,17 @@ function createInvoiceHTML() {
 function downloadPDF() {
     showLoading(true);
     
+    // Tạo số hóa đơn ở đây để cả tên file và nội dung đều dùng chung
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2);
+    const formattedDate = `${day}${month}${year}`;
+    const invoiceNumber = `${currentSheetName || 'HoaDon'}-${formattedDate}`;
+
     try {
         // Tạo element HTML tạm thời cho PDF với design đẹp
-        const pdfContent = createPDFContent();
+        const pdfContent = createPDFContent(invoiceNumber); // Truyền số hóa đơn vào
         document.body.appendChild(pdfContent);
         
         // Sử dụng html2canvas để chuyển HTML thành canvas
@@ -444,8 +485,7 @@ function downloadPDF() {
                 }
             }
             
-            const invoiceNumber = 'HD' + Date.now().toString().slice(-6);
-            doc.save(`hoa-don-${invoiceNumber}.pdf`);
+            doc.save(`${invoiceNumber}.pdf`); // Sử dụng số hóa đơn mới cho tên file
             
             // Xóa element tạm thời
             document.body.removeChild(pdfContent);
@@ -466,11 +506,10 @@ function downloadPDF() {
 }
 
 // Tạo nội dung HTML cho PDF với design đẹp
-function createPDFContent() {
+function createPDFContent(invoiceNumber) { // Nhận số hóa đơn từ bên ngoài
     const { totalAmount, totalPaid, totalDebt } = calculateTotalsFromExcel();
     const currentDate = new Date().toLocaleDateString('vi-VN');
-    const invoiceNumber = 'HD' + Date.now().toString().slice(-6);
-    
+
     const pdfElement = document.createElement('div');
     pdfElement.style.cssText = `
         position: fixed;
@@ -487,13 +526,17 @@ function createPDFContent() {
     let tableRows = '';
     currentData.forEach((row, index) => {
         tableRows += `
-            <tr style="border-bottom: 1px solid #e5e7eb;">
-                <td style="padding: 12px 8px; text-align: center; font-weight: 500;">${index + 1}</td>
-                <td style="padding: 12px 8px;">${formatDate(row['Ngày tháng'])}</td>
-                <td style="padding: 12px 8px;">${row['Loại hàng'] || ''}</td>
-                <td style="padding: 12px 8px; text-align: right;">${formatCurrency(row['Đơn giá'])}</td>
-                <td style="padding: 12px 8px; text-align: center;">${row['Số lượng'] || ''}</td>
-                <td style="padding: 12px 8px; text-align: right; font-weight: 600; color: #059669;">${formatCurrency(row['Thành tiền'])}</td>
+            <tr style="border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
+                <td style="padding: 10px 5px; text-align: center; font-weight: 500; font-size: 11px;">${index + 1}</td>
+                <td style="padding: 10px 5px; font-size: 11px;">${formatDate(row['Ngày tháng'])}</td>
+                <td style="padding: 10px 5px; font-size: 11px; word-break: break-word;">${row['Loại giao dịch'] || ''}</td>
+                <td style="padding: 10px 5px; font-size: 11px; word-break: break-word;">${row['Loại hàng'] || ''}</td>
+                <td style="padding: 10px 5px; text-align: right; font-size: 11px;">${formatCurrency(row['Đơn giá'])}</td>
+                <td style="padding: 10px 5px; text-align: center; font-size: 11px;">${row['Số lượng'] || ''}</td>
+                <td style="padding: 10px 5px; text-align: right; font-weight: 600; font-size: 11px; color: #1f2937;">${formatCurrency(row['Thành tiền'])}</td>
+                <td style="padding: 10px 5px; text-align: right; font-weight: 600; font-size: 11px; color: #059669;">${formatCurrency(row['Thanh toán'])}</td>
+                <td style="padding: 10px 5px; text-align: right; font-weight: 600; font-size: 11px; color: #dc2626;">${formatCurrency(row['Còn nợ'])}</td>
+                <td style="padding: 10px 5px; font-size: 11px; word-break: break-word;">${row['Ghi chú'] || ''}</td>
             </tr>
         `;
     });
@@ -504,29 +547,21 @@ function createPDFContent() {
                 HÓA ĐƠN THANH TOÁN
             </h1>
             <p style="font-size: 16px; color: #6b7280; margin: 0;">Số hóa đơn: <strong style="color: #1f2937;">${invoiceNumber}</strong></p>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; padding: 20px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #3b82f6;">
-            <div>
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Ngày tạo</p>
-                <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">${currentDate}</p>
-            </div>
-            <div style="text-align: right;">
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">File gốc</p>
-                <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">${fileName}</p>
-            </div>
-        </div>
-        
+   
         <div style="margin-bottom: 30px;">
-            <table style="width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                 <thead>
-                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <th style="padding: 16px 8px; text-align: center; font-weight: 600; font-size: 14px;">STT</th>
-                        <th style="padding: 16px 8px; text-align: left; font-weight: 600; font-size: 14px;">Ngày</th>
-                        <th style="padding: 16px 8px; text-align: left; font-weight: 600; font-size: 14px;">Mặt hàng</th>
-                        <th style="padding: 16px 8px; text-align: right; font-weight: 600; font-size: 14px;">Đơn giá</th>
-                        <th style="padding: 16px 8px; text-align: center; font-weight: 600; font-size: 14px;">Số lượng</th>
-                        <th style="padding: 16px 8px; text-align: right; font-weight: 600; font-size: 14px;">Thành tiền</th>
+                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; page-break-inside: avoid;">
+                        <th style="padding: 12px 5px; text-align: center; font-weight: 600;">STT</th>
+                        <th style="padding: 12px 5px; text-align: left; font-weight: 600;">Ngày</th>
+                        <th style="padding: 12px 5px; text-align: left; font-weight: 600;">Loại GD</th>
+                        <th style="padding: 12px 5px; text-align: left; font-weight: 600;">Mặt hàng</th>
+                        <th style="padding: 12px 5px; text-align: right; font-weight: 600;">Đơn giá</th>
+                        <th style="padding: 12px 5px; text-align: center; font-weight: 600;">SL</th>
+                        <th style="padding: 12px 5px; text-align: right; font-weight: 600;">Thành tiền</th>
+                        <th style="padding: 12px 5px; text-align: right; font-weight: 600;">Thanh toán</th>
+                        <th style="padding: 12px 5px; text-align: right; font-weight: 600;">Còn nợ</th>
+                        <th style="padding: 12px 5px; text-align: left; font-weight: 600;">Ghi chú</th>
                     </tr>
                 </thead>
                 <tbody style="background: white;">
@@ -551,9 +586,32 @@ function createPDFContent() {
             </div>
         </div>
         
-        <div style="margin-top: 50px; text-align: center; padding: 20px; border-top: 2px solid #e5e7eb;">
-            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Cảm ơn quý khách đã sử dụng dịch vụ!</p>
-            <p style="margin: 0; font-size: 14px; color: #6b7280;">Hóa đơn được tạo tự động từ hệ thống Excel to Invoice</p>
+        <div style="margin-top: 30px; text-align: center; page-break-inside: avoid;">
+            <div style="margin-bottom: 15px; padding: 15px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 8px; border: 1px solid #e2e8f0;">
+                <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ!</p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280; font-style: italic;">Chúng tôi luôn nỗ lực để mang đến dịch vụ tốt nhất cho quý khách hàng.</p>
+            </div>
+            
+            <div style="padding: 20px; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 6px; display: inline-block;">
+                    CÔNG TY TNHH MỘT THÀNH VIÊN HỒNG XÔ
+                </h3>
+                
+                <div style="display: flex; justify-content: center; gap: 25px; margin-top: 12px; flex-wrap: wrap; font-size: 12px;">
+                    <div style="text-align: left;">
+                        <p style="margin: 0 0 6px 0; font-weight: 600; color: #374151;">📞 Liên hệ:</p>
+                        <p style="margin: 0 0 10px 0; color: #6b7280;">0987957669 (anh Hồng)</p>
+                        
+                        <p style="margin: 0 0 6px 0; font-weight: 600; color: #374151;">✉️ Email:</p>
+                        <p style="margin: 0; color: #6b7280;">hongnguyenxuan1111@gmail.com</p>
+                    </div>
+                    
+                    <div style="text-align: left;">
+                        <p style="margin: 0 0 6px 0; font-weight: 600; color: #374151;">📍 Địa chỉ:</p>
+                        <p style="margin: 0; color: #6b7280; max-width: 180px;">123 Đường XYZ, Phường ABC<br>Quận 1, TP. Hồ Chí Minh</p>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
     
