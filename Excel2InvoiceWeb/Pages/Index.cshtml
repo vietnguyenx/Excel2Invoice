@@ -1,0 +1,127 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Excel to Invoice - Quản lý hóa đơn";
+}
+
+<div class="container">
+    <header>
+        <h1><i class="fas fa-file-invoice"></i> Excel to Invoice</h1>
+        <p>Quản lý dữ liệu mua bán và xuất hóa đơn thanh toán</p>
+    </header>
+
+    <main>
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="upload-card">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Tải lên file Excel</h3>
+                    <p>Kéo thả file Excel hoặc click để chọn file</p>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
+                    <button type="button" class="btn-upload" id="selectFileBtn">
+                        <i class="fas fa-plus"></i> Chọn file
+                    </button>
+                </div>
+                <div class="upload-info">
+                    <h4>Định dạng file yêu cầu:</h4>
+                    <ul>
+                        <li>STT, Ngày tháng, Loại giao dịch</li>
+                        <li>Loại hàng, Đơn giá, Số lượng</li>
+                        <li>Thành tiền, Thanh toán, Còn nợ, Ghi chú</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Table Section -->
+        <section class="data-section" id="dataSection" style="display: none;">
+            <div class="section-header">
+                <h2><i class="fas fa-table"></i> Dữ liệu đã tải lên</h2>
+                <div class="section-actions">
+                    <div class="filter-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showZeroRows" onchange="toggleZeroRows()">
+                            <span class="checkbox-text">Hiển thị dòng có giá trị 0</span>
+                        </label>
+                    </div>
+                    <button class="btn-secondary" onclick="clearData()">
+                        <i class="fas fa-trash"></i> Xóa dữ liệu
+                    </button>
+                    <button class="btn-primary" onclick="generateInvoice()">
+                        <i class="fas fa-file-pdf"></i> Xuất hóa đơn
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Ngày tháng</th>
+                            <th>Loại giao dịch</th>
+                            <th>Loại hàng</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                            <th>Thanh toán</th>
+                            <th>Còn nợ</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-section">
+                <div class="summary-card">
+                    <h3>Tổng kết</h3>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Giao dịch hiển thị:</span>
+                            <span class="stat-value" id="totalTransactions">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Tổng thành tiền:</span>
+                            <span class="stat-value" id="totalAmount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Đã thanh toán:</span>
+                            <span class="stat-value" id="totalPaid">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Còn nợ:</span>
+                            <span class="stat-value" id="totalDebt">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Invoice Generation Section -->
+        <section class="invoice-section" id="invoiceSection" style="display: none;">
+            <div class="section-header">
+                <h2><i class="fas fa-receipt"></i> Hóa đơn thanh toán</h2>
+                <div class="section-actions">
+                    <button class="btn-secondary" onclick="hideInvoice()">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                    <button class="btn-primary" onclick="downloadPDF()">
+                        <i class="fas fa-download"></i> Tải xuống PDF
+                    </button>
+                </div>
+            </div>
+            <div class="invoice-preview" id="invoicePreview">
+                <!-- Invoice content will be generated here -->
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Đang xử lý...</p>
+    </div>
+</div>
