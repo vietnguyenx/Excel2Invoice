@@ -427,7 +427,7 @@ function createInvoiceHTML() {
                     
                     <div style="text-align: left;">
                         <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #374151;">📍 Địa chỉ:</p>
-                        <p style="margin: 0; font-size: 14px; color: #6b7280; max-width: 200px;">123 Đường XYZ, Phường ABC<br>Quận 1, TP. Hồ Chí Minh</p>
+                        <p style="margin: 0; font-size: 14px; color: #6b7280; max-width: 200px;">Đang cập nhật</p>
                     </div>
                 </div>
             </div>
@@ -608,7 +608,7 @@ function createPDFContent(invoiceNumber) { // Nhận số hóa đơn từ bên n
                     
                     <div style="text-align: left;">
                         <p style="margin: 0 0 6px 0; font-weight: 600; color: #374151;">📍 Địa chỉ:</p>
-                        <p style="margin: 0; color: #6b7280; max-width: 180px;">123 Đường XYZ, Phường ABC<br>Quận 1, TP. Hồ Chí Minh</p>
+                        <p style="margin: 0; color: #6b7280; max-width: 180px;">Đang cập nhật</p>
                     </div>
                 </div>
             </div>
